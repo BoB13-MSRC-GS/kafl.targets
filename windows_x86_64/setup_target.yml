@@ -2,43 +2,26 @@
   hosts: all
   vars:
     vcvars_path: "{{ ansible_env['ProgramFiles'] }}\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat"
-    dest_path: "{{ ansible_env.USERPROFILE }}\\Desktop"
+    dest_path: "C:\\Users\\Public"
     wdk_include_km_path: "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\km"
     wdk_lib_path: "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.17763.0\\km\\x64"
     ntoskrnllib_path: "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.17763.0\\km\\x64\\ntoskrnl.lib"
   tasks:
-    # - name: Set default value for target_harness
-    #   set_fact:
-    #     target_harness: 'provision_target'
-    #   when: target_harness is undefined
-
-    - name: Upload binaries
+    - name: Upload binaries1
       win_copy:
-        src: bin
+        src: "/home/fuzzer/kAFL/kafl/examples/windows_x86_64/bin/userspace/inject.exe"
+        dest: "{{ dest_path }}"
+    - name: Upload binaries2
+      win_copy:
+        src: "/home/fuzzer/kAFL/kafl/examples/windows_x86_64/bin/userspace/hightosys.exe"
+        dest: "{{ dest_path }}"
+    - name: Upload binaries3
+      win_copy:
+        src: "/home/fuzzer/kAFL/kafl/examples/windows_x86_64/bin/userspace/kafl_sysmain.dll"
         dest: "{{ dest_path }}"
 
-
-        # win_service cannot create kernel level services
-    - name: Set service to start Call Stack Dump.sys at boot
-      win_command: "sc create hook binPath= {{ dest_path + '/bin/driver/Harness_for_nyx.sys' | ansible.windows.quote }} type= kernel start= auto"
-      register: result
-      failed_when:
-        - result.rc != 0
-        - result.rc != 1073 # service already exists
-
-    - name: Set service to start vuln_test to trigger the driver
+    - name: Setup userspace harness to run at user login with elevated privileges
       win_service:
-        name: vuln_driver_trigger
-        path: "{{ dest_path }}\\bin\\driver\\vuln_test.exe"
+        name: vuln
+        path: "C:\\Users\\Public\\hightosys.exe"
         start_mode: auto
-
-    - name: Set service to Vuln Target
-      win_command: "sc create target binPath= {{ dest_path + '/bin/driver/target.sys' | ansible.windows.quote }} type= kernel start= auto"
-      register: result_target
-      failed_when:
-        - result_target.rc != 0
-        - result_target.rc != 1073 # service already exists
-    # ## 스페이스바를 써야함...
-      when: target_harness == 'provision_target'
-
-    # - name: HELLO

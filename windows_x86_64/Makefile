@@ -21,8 +21,14 @@ gui:
 
 compile:
 	mkdir -p bin/{userspace,driver}
-	x86_64-w64-mingw32-gcc src/userspace/selffuzz_test.c -I ../ -o bin/userspace/selffuzz_test.exe -Wall -mwindows 
-	x86_64-w64-mingw32-gcc src/driver/vuln_test.c -I ../ -o bin/driver/vuln_test.exe -Wall -lntdll -lpsapi
+	x86_64-w64-mingw32-gcc src/userspace/hightosys.c -I ../ -o bin/userspace/hightosys.exe -Wall
+	x86_64-w64-mingw32-gcc src/userspace/inject.c -I ../ -o bin/userspace/inject.exe -Wall   -lpsapi
+	x86_64-w64-mingw32-gcc -shared src/userspace/kafl_sysmain.c src/userspace/sysmain_c.c -I ../ -o bin/userspace/kafl_sysmain.dll -Wall -lrpcrt4 -ldbghelp
+
+pu: compile ansible
+	vagrant snapshot restore 'ready_provision'
+	TARGET_HARNESS='userspace' vagrant provision
+	vagrant halt
 
 target: compile ansible
 	vagrant up --no-provision

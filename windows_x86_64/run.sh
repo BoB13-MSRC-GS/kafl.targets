@@ -1,1 +1,1 @@
-kafl fuzz -w work --seed-dir seed --redqueen -p `nproc` --t-soft 255 --purge -i result.json --use_call_stack --t-hard 255
+kafl fuzz -w work --seed-dir seed --redqueen -p `nproc` --purge --kickstart 0 --t-soft 200 --t-hard 200
