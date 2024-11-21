@@ -71,46 +71,53 @@
         type: dword
         state: present
 
-    #- name: Download Visual Studio 2022 community installer
-    #  win_get_url:
-    #    url: https://aka.ms/vs/17/release/vs_Community.exe
-    #    dest: "{{ ansible_facts['env']['TEMP'] }}\\vs_community.exe"
+    # Windows Update Tasks
+    - name: Enable Windows Update Service
+      win_service:
+        name: wuauserv
+        start_mode: auto
+        state: started
 
-    # https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community?view=vs-2022&preserve-view=true
-    #- name: Install Visual Studio community and compiler
-    #  win_command:
-    #    # cmd: vs_community.exe --quiet --wait --norestart --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows11SDK.22000
-    #    cmd: vs_community.exe --quiet --wait --norestart --add Microsoft.VisualStudio.Workload.NativeDesktop --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64
-    #  args:
-    #    chdir: "{{ ansible_facts['env']['TEMP'] }}"
+    - name: Enable Background Intelligent Transfer Service
+      win_service:
+        name: bits
+        start_mode: auto
+        state: started
 
-    #- name: Download latest SDK
-    #  win_get_url:
-    #    url: https://go.microsoft.com/fwlink/?linkid=2237387
-    #    dest: "{{ ansible_facts['env']['TEMP'] }}\\sdk_setup.exe"
+    - name: Enable Windows Update Orchestrator Service
+      win_service:
+        name: UsoSvc
+        start_mode: auto
+        state: started
 
-    #- name: Install latest SDK
-    #  win_command:
-    #    cmd: sdk_setup.exe /q /norestart
-    #  args:
-    #    chdir: "{{ ansible_facts['env']['TEMP'] }}"
+    - name: Install NuGet Provider for PowerShell
+      win_shell: Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+      ignore_errors: yes
 
-    #- name: Download latest WDK
-    #  win_get_url:
-    #    url: https://go.microsoft.com/fwlink/?linkid=2196230
-    #    dest: "{{ ansible_facts['env']['TEMP'] }}\\wdk_setup.exe"
+    - name: Install Windows Update PowerShell Module
+      win_shell: Install-Module -Name PSWindowsUpdate -Force -AllowClobber
+      ignore_errors: yes
 
-    #- name: Install WDK
-    #  win_command:
-    #    cmd: wdk_setup.exe /q /norestart
-    #  args:
-    #    chdir: "{{ ansible_facts['env']['TEMP'] }}"
+    - name: Configure Automatic Updates
+      win_regedit:
+        path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update
+        name: AUOptions
+        data: 4  # 4 = Automatically download and install
+        type: dword
+        state: present
 
-    #- name: Install WDK VSIX extension
-    #  win_command:
-    #    cmd: "{{ vsix_installer | ansible.windows.quote }} /quiet /admin /logFile:C:\\wdk_vsix.log WDK.vsix"
-    #  args:
-    #    chdir: "{{ wdk_vsix_dir }}"
+    - name: Install All Available Windows Updates
+      win_updates:
+        category_names:
+          - SecurityUpdates
+          - CriticalUpdates
+          - UpdateRollups
+          - Updates
+          - DefinitionUpdates
+        state: installed
+        reboot: yes
+        reboot_timeout: 3600
+      register: windows_update_result
 
     - name: Enable Testsigning
       win_command: Bcdedit.exe -set TESTSIGNING ON
