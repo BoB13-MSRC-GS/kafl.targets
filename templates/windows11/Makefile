@@ -5,7 +5,7 @@ ROOT_DIR := $(CUR_DIR)/../..
 
 $(ROOT_DIR)/venv/bin/ansible-playbook:
 	python3 -m venv $(ROOT_DIR)/venv
-	$(ROOT_DIR)/venv/bin/python -m pip install ansible==7.1.0 pywinrm
+	$(ROOT_DIR)/venv/bin/python -m pip install ansible==6.7.0 pywinrm
 
 ansible: $(ROOT_DIR)/venv/bin/ansible-playbook
 
