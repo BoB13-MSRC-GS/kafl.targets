@@ -1,0 +1,54 @@
+---
+- name: Setup target
+  hosts: all
+  vars:
+    vcvars_path: "{{ ansible_env['ProgramFiles'] }}\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat"
+    dest_path: "C:\\Users\\Public"
+    wdk_include_km_path: "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.17763.0\\km"
+    wdk_lib_path: "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.17763.0\\km\\x64"
+    ntoskrnllib_path: "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.17763.0\\km\\x64\\ntoskrnl.lib"
+  tasks:
+    - name: Upload binaries1
+      win_copy:
+        src: "/home/fuzzer/kAFL/kafl/examples/windows_x86_64/bin/userspace/inject.exe"
+        dest: "{{ dest_path }}"
+    
+    - name: Upload binaries2
+      win_copy:
+        src: "/home/fuzzer/kAFL/kafl/examples/windows_x86_64/bin/userspace/hightosys.exe"
+        dest: "{{ dest_path }}"
+    
+    # edit new harness dll
+    - name: Upload binaries3
+      win_copy:
+        src: "/home/fuzzer/kAFL/kafl/examples/windows_x86_64/bin/userspace/kafl_cryptsvc.dll"
+        dest: "{{ dest_path }}"
+    
+    - name: Upload ServiceName
+      win_copy:
+        src: "/home/fuzzer/kAFL/kafl/examples/windows_x86_64/bin/userspace/ServiceName.txt"
+        dest: "{{ dest_path }}"
+
+    # edit target service Name in taskmgr
+    - name: Ensure Service is set to automatic startup
+      win_service:
+        name: CryptSvc 
+        start_mode: auto
+        state: started
+
+    # edit target service Name in taskmgr
+    - name: Verify Service is running
+      win_shell: |
+        $service = Get-Service -Name CryptSvc
+        if ($service.Status -ne 'Running') {
+          Write-Error "Service is not running"
+          exit 1
+        }
+      register: service_check
+      failed_when: service_check.rc != 0
+    
+    - name: Setup userspace harness to run at user login with elevated privileges
+      win_service:
+        name: vuln
+        path: "C:\\Users\\Public\\hightosys.exe"
+        start_mode: auto
