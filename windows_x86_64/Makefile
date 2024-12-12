@@ -21,9 +21,9 @@ gui:
 
 compile:
 	#mkdir -p bin/{userspace,driver}
-	#x86_64-w64-mingw32-gcc src/userspace/hightosys.c -I ../ -o bin/userspace/hightosys.exe -Wall
-	#x86_64-w64-mingw32-gcc src/userspace/inject.c -I ../ -o bin/userspace/inject.exe -Wall   -lpsapi
-	#x86_64-w64-mingw32-gcc -shared src/userspace/kafl_sysmain.c src/userspace/sysmain_c.c -I ../ -o bin/userspace/kafl_sysmain.dll -Wall -lrpcrt4 -ldbghelp
+	#x86_64-w64-mingw32-gcc src/userspace/hightosys.cpp -I ../ -o bin/userspace/hightosys.exe -Wall
+	#x86_64-w64-mingw32-gcc src/userspace/inject.cpp -I ../ -o bin/userspace/inject.exe -Wall   -lpsapi
+	#x86_64-w64-mingw32-gcc -shared src/userspace/kafl_sysmain.cpp src/userspace/sysmain_c.c -I ../ -o bin/userspace/kafl_sysmain.dll -Wall -lrpcrt4 -ldbghelp
 
 pu: compile ansible
 	vagrant snapshot restore 'ready_provision'

