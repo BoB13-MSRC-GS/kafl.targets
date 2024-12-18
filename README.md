@@ -1,5 +1,6 @@
 <div align='center'>
-  <h1><code>kafl.targets (BoB13-MSRC_GASAN)</code></h1>
+  <h1><code>kafl.targets
+(BoB13-MSRC_GASAN)</code></h1>
   <p>
     <strong>kafl windows example (support Windows Service fuzzing)</strong><br>
   </p>
@@ -14,7 +15,7 @@
 We make 'hightosys -> inject -> harness dll' fuzzing methods
 <div align='center'>
   <p>
-    <img src='add please'/>
+    <img src='diagram.png'/>
   </p>
 </div>
 
